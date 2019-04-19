@@ -60,6 +60,22 @@ This is an example cakephp app with user accounts and a REST api.
 }
 ```
 
+- add login template in `/app/src/Template/Users/login.php`
+
+```php
+<div class="users form large-9 medium-8 columns content">
+    <?=$this->Form->create() ?>
+    <fieldset>
+        <legend><?=__('Login') ?></legend>
+        <?php
+            echo $this->Form->control('email');
+            echo $this->Form->control('password');
+        ?>
+    </fieldset>
+    <?=$this->Form->button(__('Submit')) ?>
+    <?=$this->Form->end() ?>
+</div>
+```
 
 ### configure plugins
 
@@ -180,10 +196,5 @@ This is an example cakephp app with user accounts and a REST api.
         return $this->redirect($this->Authentication->logout());
     }
 ```
-
-#### cakephp/authorization
-
-
-
 
 ## Steps to run
