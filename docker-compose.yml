@@ -16,7 +16,7 @@ services:
     volumes:
       - ./app:/app
     ports:
-      - "8765:80"
+      - "8764:80"
 
 
   mysql:

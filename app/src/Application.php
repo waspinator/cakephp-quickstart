@@ -17,6 +17,10 @@ namespace App;
 use Authentication\AuthenticationService;
 use Authentication\AuthenticationServiceProviderInterface;
 use Authentication\Middleware\AuthenticationMiddleware;
+use Authorization\AuthorizationService;
+use Authorization\AuthorizationServiceProviderInterface;
+use Authorization\Middleware\AuthorizationMiddleware;
+use Authorization\Policy\OrmResolver;
 use Cake\Core\Configure;
 use Cake\Core\Exception\MissingPluginException;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
@@ -33,7 +37,7 @@ use Psr\Http\Message\ServerRequestInterface;
  * This defines the bootstrapping logic and middleware layers you
  * want to use in your application.
  */
-class Application extends BaseApplication implements AuthenticationServiceProviderInterface
+class Application extends BaseApplication implements AuthenticationServiceProviderInterface, AuthorizationServiceProviderInterface
 {
 
     /**
@@ -65,12 +69,20 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         return $service;
     }
 
+    public function getAuthorizationService(ServerRequestInterface $request, ResponseInterface $response)
+    {
+        $resolver = new OrmResolver();
+
+        return new AuthorizationService($resolver);
+    }
+
     /**
      * {@inheritDoc}
      */
     public function bootstrap()
     {
         $this->addPlugin('Authentication');
+        $this->addPlugin('Authorization');
         $this->addPlugin('Crud');
 
         // Call parent to load bootstrap from files.
@@ -125,8 +137,25 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'unauthenticatedRedirect' => Router::url('/users/login')
         ]);
 
+        $authorization = new AuthorizationMiddleware($this, [
+            'identityDecorator' => function (AuthorizationService $authorization, Identity $user) {
+                return $user->setAuthorization($authorization);
+            },
+            'requireAuthorizationCheck' => true,
+            'unauthorizedHandler' => [
+                'className' => 'Authorization.Redirect',
+                'url' => '/users/login',
+                'queryParam' => 'redirectUrl',
+                'exceptions' => [
+                    MissingIdentityException::class,
+                    OtherException::class
+                ]
+            ]
+        ]);
+
         // Add the middleware to the middleware queue
         $middlewareQueue->add($authentication);
+        $middlewareQueue->add($authorization);
 
         return $middlewareQueue;
     }

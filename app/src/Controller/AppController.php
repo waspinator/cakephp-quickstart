@@ -63,6 +63,12 @@ class AppController extends Controller
             ]
         ]);
 
+        $this->loadComponent('Authorization.Authorization', [
+            'skipAuthorization' => [
+                'display'
+            ]
+        ]);
+
         $this->loadComponent('Flash');
 
         /*
