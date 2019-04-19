@@ -23,3 +23,7 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash \
 
 # link cakephp app to default apache directory
 RUN rm -R /var/www/html && ln -s /app/webroot /var/www/html
+
+COPY ./app /app
+
+RUN composer install --working-dir /app

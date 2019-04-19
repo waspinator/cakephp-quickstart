@@ -198,3 +198,10 @@ This is an example cakephp app with user accounts and a REST api.
 ```
 
 ## Steps to run
+
+Requires docker and docker-compose. [Instructions](https://docs.docker.com/install/)
+
+- `docker-compose up -d`
+- `docker exec -it cakephp_quickstart composer install --working-dir /app`
+- `docker exec -it cakephp_quickstart /app/bin/cake migrations migrate`
+- `docker exec -it cakephp_quickstart /app/bin/cake migrations seed`
