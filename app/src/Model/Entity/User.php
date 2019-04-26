@@ -1,9 +1,10 @@
 <?php
 namespace App\Model\Entity;
 
+use Authentication\IdentityInterface as AuthenticationIdentity;
 use Authentication\PasswordHasher\DefaultPasswordHasher;
 use Authorization\AuthorizationService;
-use Authorization\IdentityInterface;
+use Authorization\IdentityInterface as AuthorizationIdentity;
 use Cake\ORM\Entity;
 
 /**
@@ -28,7 +29,7 @@ use Cake\ORM\Entity;
  * @property int|null $created_by
  * @property int|null $modified_by
  */
-class User extends Entity implements IdentityInterface
+class User extends Entity implements AuthorizationIdentity, AuthenticationIdentity
 {
     /**
      * Fields that can be mass assigned using newEntity() or patchEntity().
