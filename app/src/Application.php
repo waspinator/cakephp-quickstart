@@ -49,7 +49,9 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
      */
     public function getAuthenticationService(ServerRequestInterface $request, ResponseInterface $response)
     {
-        $service = new AuthenticationService();
+        $service = new AuthenticationService([
+            'identityClass' => $identityResolver // what should $identityResolver be?
+        ]);
 
         $fields = [
             'username' => 'email',
@@ -138,8 +140,10 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         ]);
 
         $authorization = new AuthorizationMiddleware($this, [
-            'identityDecorator' => function (AuthorizationService $authorization, Identity $user) {
+            'identityDecorator' => function (AuthorizationService $authorization, Identity $identity) {
+                $user = $identity->getOriginalData();
                 return $user->setAuthorization($authorization);
+
             },
             'requireAuthorizationCheck' => true,
             'unauthorizedHandler' => [
