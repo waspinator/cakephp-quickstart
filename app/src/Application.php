@@ -14,10 +14,12 @@
  */
 namespace App;
 
+use ArrayAccess;
 use Authentication\AuthenticationService;
 use Authentication\AuthenticationServiceProviderInterface;
 use Authentication\Middleware\AuthenticationMiddleware;
 use Authorization\AuthorizationService;
+use Authorization\AuthorizationServiceInterface;
 use Authorization\AuthorizationServiceProviderInterface;
 use Authorization\Middleware\AuthorizationMiddleware;
 use Authorization\Policy\OrmResolver;
@@ -49,9 +51,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
      */
     public function getAuthenticationService(ServerRequestInterface $request, ResponseInterface $response)
     {
-        $service = new AuthenticationService([
-            'identityClass' => $identityResolver // what should $identityResolver be?
-        ]);
+        $service = new AuthenticationService();
 
         $fields = [
             'username' => 'email',
@@ -136,13 +136,13 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
 
         // Add the authentication middleware
         $authentication = new AuthenticationMiddleware($this, [
-            'unauthenticatedRedirect' => Router::url('/users/login')
+            'unauthenticatedRedirect' => Router::url('/users/login'),
+            'queryParam' => 'redirect'
         ]);
 
         $authorization = new AuthorizationMiddleware($this, [
-            'identityDecorator' => function (AuthorizationService $authorization, Identity $identity) {
-                $user = $identity->getOriginalData();
-                return $user->setAuthorization($authorization);
+            'identityDecorator' => function (AuthorizationServiceInterface $authorization, ArrayAccess $identity) {
+                return $identity->setAuthorization($authorization);
 
             },
             'requireAuthorizationCheck' => true,
@@ -160,6 +160,16 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         // Add the middleware to the middleware queue
         $middlewareQueue->add($authentication);
         $middlewareQueue->add($authorization);
+
+        if (Configure::read('debug')) {
+            // Disable authorization for DebugKit
+            $middlewareQueue->add(function ($req, $res, $next) {
+                if ($req->getParam('plugin') === 'DebugKit') {
+                    $req->getAttribute('authorization')->skipAuthorization();
+                }
+                return $next($req, $res);
+            });
+        }
 
         return $middlewareQueue;
     }

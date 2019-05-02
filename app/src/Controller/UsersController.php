@@ -41,4 +41,13 @@ class UsersController extends AppController
         return $this->redirect($this->Authentication->logout());
     }
 
+    public function view($id)
+    {
+        $this->Crud->on('afterFind', function (Event $event) {
+            $entity = $event->getSubject()->entity;
+            $this->Authorization->authorize('view', $entity);
+        });
+
+        return $this->Crud->execute();
+    }
 }
