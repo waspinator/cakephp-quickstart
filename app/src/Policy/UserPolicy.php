@@ -3,12 +3,22 @@ namespace App\Policy;
 
 use App\Model\Entity\User;
 use Authorization\IdentityInterface;
+use Authorization\Policy\BeforePolicyInterface;
 
 /**
  * User policy
  */
-class UserPolicy
+class UserPolicy implements BeforePolicyInterface
 {
+
+    public function before($user, $resource, $action)
+    {
+        if ($user->getOriginalData()->is_superuser) {
+            return true;
+        }
+        // fall through
+    }
+
     /**
      * Check if $user can create User
      *
@@ -18,7 +28,7 @@ class UserPolicy
      */
     public function canCreate(IdentityInterface $user, User $resource)
     {
-        return true;
+        return false;
     }
 
     /**
@@ -30,7 +40,7 @@ class UserPolicy
      */
     public function canUpdate(IdentityInterface $user, User $resource)
     {
-        return true;
+        return false;
     }
 
     /**
@@ -42,7 +52,7 @@ class UserPolicy
      */
     public function canDelete(IdentityInterface $user, User $resource)
     {
-        return true;
+        return false;
     }
 
     /**

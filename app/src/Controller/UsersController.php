@@ -16,8 +16,8 @@ class UsersController extends AppController
     public function beforeFilter(Event $event)
     {
         parent::beforeFilter($event);
-        $this->Authentication->allowUnauthenticated(['add', 'login']);
-        $this->Authorization->skipAuthorization(['add', 'login']);
+        $this->Authentication->allowUnauthenticated(['login']);
+        $this->Authorization->skipAuthorization(['login']);
     }
 
     public function login()
@@ -41,11 +41,38 @@ class UsersController extends AppController
         return $this->redirect($this->Authentication->logout());
     }
 
+    public function add()
+    {
+        $user = $this->Users->newEntity();
+        $this->Authorization->authorize('create', $user);
+        return $this->Crud->execute();
+    }
+
     public function view($id)
     {
         $this->Crud->on('afterFind', function (Event $event) {
             $entity = $event->getSubject()->entity;
             $this->Authorization->authorize('view', $entity);
+        });
+
+        return $this->Crud->execute();
+    }
+
+    public function edit($id)
+    {
+        $this->Crud->on('afterFind', function (Event $event) {
+            $entity = $event->getSubject()->entity;
+            $this->Authorization->authorize('update', $entity);
+        });
+
+        return $this->Crud->execute();
+    }
+
+    public function delete($id)
+    {
+        $this->Crud->on('afterFind', function (Event $event) {
+            $entity = $event->getSubject()->entity;
+            $this->Authorization->authorize('delete', $entity);
         });
 
         return $this->Crud->execute();
