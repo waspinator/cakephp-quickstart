@@ -44,7 +44,7 @@ class UsersController extends AppController
     public function add()
     {
         $user = $this->Users->newEntity();
-        $this->Authorization->authorize('create', $user);
+        $this->Authorization->authorize($user, 'create');
         return $this->Crud->execute();
     }
 
@@ -52,7 +52,7 @@ class UsersController extends AppController
     {
         $this->Crud->on('afterFind', function (Event $event) {
             $entity = $event->getSubject()->entity;
-            $this->Authorization->authorize('view', $entity);
+            $this->Authorization->authorize($entity, 'view');
         });
 
         return $this->Crud->execute();
@@ -62,7 +62,7 @@ class UsersController extends AppController
     {
         $this->Crud->on('afterFind', function (Event $event) {
             $entity = $event->getSubject()->entity;
-            $this->Authorization->authorize('update', $entity);
+            $this->Authorization->authorize($entity, 'update');
         });
 
         return $this->Crud->execute();
@@ -72,7 +72,7 @@ class UsersController extends AppController
     {
         $this->Crud->on('afterFind', function (Event $event) {
             $entity = $event->getSubject()->entity;
-            $this->Authorization->authorize('delete', $entity);
+            $this->Authorization->authorize($entity, 'delete');
         });
 
         return $this->Crud->execute();

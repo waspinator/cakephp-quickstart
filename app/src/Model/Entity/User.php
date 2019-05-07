@@ -100,7 +100,7 @@ class User extends Entity implements AuthorizationIdentity, AuthenticationIdenti
      */
     public function can($action, $resource)
     {
-        return $this->authorization->can($this, $resource, $action);
+        return $this->authorization->can($this, $action, $resource);
     }
 
     /**
